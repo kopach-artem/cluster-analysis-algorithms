@@ -3,7 +3,7 @@ from tkinter import ttk
 from tkinter import filedialog
 import pandas as pd
 import kmeans
-from utils import helper
+import kmeanspp
 
 
 def run_kmeans():
@@ -40,10 +40,11 @@ def run_kmeans():
             cluster_axis4_combobox.get(),
         )
     elif method == "kmeans++":
-        r = 2
-        # kmeanspp.KMeansPlus(data, cluster_axis1_combobox.get(), cluster_axis2_combobox.get())
+        kmeanspp.kmeans_pp(
+            data, cluster_axis1_combobox.get(), cluster_axis2_combobox.get()
+        )
     else:
-        r = 1
+        pass
         # dbscan.DBSCANImpl(data, cluster_axis1_combobox.get(), cluster_axis2_combobox.get())
 
     root.destroy()
