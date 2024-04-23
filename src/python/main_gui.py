@@ -4,6 +4,7 @@ from tkinter import filedialog
 import pandas as pd
 import kmeans
 import kmeanspp
+from utils import filters
 
 
 def run_kmeans():
@@ -31,6 +32,9 @@ def run_kmeans():
     print("Method: ", method)
 
     if method == "kmeans":
+        filters.my_filter(
+            data, 0.15, cluster_axis1_combobox.get(), cluster_axis2_combobox.get()
+        )
         kmeans.kmeans(
             data,
             int(cluster_count_entry.get()),
