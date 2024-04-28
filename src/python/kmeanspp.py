@@ -55,7 +55,7 @@ def kmeans_pp(data: pd.DataFrame, par1: str, par2: str):
 
     # Visualising the clusters
     for i in range(1, optimal_clusters):
-        data_k = data_scaled[y_kmeans == k]
+        data_k = data_scaled[y_kmeans == i]
     plt.scatter(
         data_scaled[y_kmeans == 0, 0],
         data_scaled[y_kmeans == 0, 1],
@@ -103,8 +103,8 @@ def kmeans_pp(data: pd.DataFrame, par1: str, par2: str):
     plt.ylabel(par2)
     plt.legend()
 
-    next_file_number = helper.find_next_file_number(KMeansPlus.__name__)
-    filename = KMeansPlus.__name__ + "_" + str(next_file_number) + ".png"
+    next_file_number = helper.find_next_file_number(kmeans_pp.__name__)
+    filename = kmeans_pp.__name__ + "_" + str(next_file_number) + ".png"
 
     plt.savefig(os.path.join(helper.target_directory, filename))
 

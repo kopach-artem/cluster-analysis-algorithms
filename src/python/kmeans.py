@@ -148,6 +148,7 @@ def kmeans(data: pd.DataFrame, k: int, par1: str, par2: str, par3: str, par4: st
             data.at[index, par4] = ((row[par4] - par4_min) / (par4_max - par4_min)) * 10
         for cluster in range(k):
             data_at_cluster = data[data["Cluster"] == cluster + 1]
+            print(f"Cluster: {cluster} : {data_at_cluster}")
             img = ax.scatter(
                 data_at_cluster[par1],
                 data_at_cluster[par2],
@@ -178,6 +179,7 @@ def kmeans(data: pd.DataFrame, k: int, par1: str, par2: str, par3: str, par4: st
         ax = fig.add_subplot(111, projection="3d")
         for cluster in range(k):
             data_at_cluster = data[data["Cluster"] == cluster + 1]
+            print(f"Cluster: {cluster} : {data_at_cluster}")
             ax.scatter(
                 data_at_cluster[par1],
                 data_at_cluster[par2],
@@ -199,6 +201,7 @@ def kmeans(data: pd.DataFrame, k: int, par1: str, par2: str, par3: str, par4: st
     else:
         for cluster in range(k):
             data_at_cluster = data[data["Cluster"] == cluster + 1]
+            print(f"Cluster: {cluster} : {data_at_cluster}")
             plt.scatter(
                 data_at_cluster[par1], data_at_cluster[par2], c=helper.random_color()
             )
