@@ -131,7 +131,7 @@ while True:
 
     root.mainloop()
 
-    ans = str(input("Do you want to comntinue? y/n: "))
+    ans = str(input("Do you want to continue? y/n: "))
 
     if ans == "y":
         continue
