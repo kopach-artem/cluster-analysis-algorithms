@@ -32,11 +32,11 @@ def run_kmeans():
     print("Method: ", method)
 
     if method == "kmeans":
-        # data_raw = filters.my_filter(
-        #     data, 11, cluster_axis1_combobox.get(), cluster_axis2_combobox.get()
-        # )
+        data_raw = filters.my_filter(
+            data, 11, cluster_axis1_combobox.get(), cluster_axis2_combobox.get()
+        )
         kmeans.kmeans(
-            data,
+            data_raw,
             int(cluster_count_entry.get()),
             cluster_axis1_combobox.get(),
             cluster_axis2_combobox.get(),
