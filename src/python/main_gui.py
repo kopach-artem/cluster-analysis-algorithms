@@ -67,6 +67,25 @@ def add_axis_entry():
         print("Cannot add more than 4 clustering axes.")
 
 
+def on_combobox_select(event):
+    selected_option = event.widget.get()
+    # Update all other comboboxes to exclude the selected option
+    comboboxes = [
+        cluster_axis1_combobox,
+        cluster_axis2_combobox,
+        cluster_axis3_combobox,
+        cluster_axis4_combobox,
+    ]
+    for cb in comboboxes:
+        if cb is not event.widget:
+            current_value = cb.get()
+            # cb["values"] = [x for x in column_names if x != selected_option]
+            if current_value == selected_option:
+                cb.set("")  # Clear selection if it's the same as the newly selected
+
+
+column_names = []
+
 while True:
     axis_counter = 2
     file_path = filedialog.askopenfilename(
@@ -79,8 +98,6 @@ while True:
         print(data.head())
     else:
         raise Exception("Sorry, you do not select any file.")
-
-    column_names = []
 
     for column in data.columns:
         if data[column].dtype == "int64" or data[column].dtype == "float":
@@ -104,19 +121,22 @@ while True:
     cluster_axis1_label.grid(row=1, column=0, padx=5, pady=5)
     cluster_axis1_combobox = ttk.Combobox(root, values=column_names)
     cluster_axis1_combobox.grid(row=1, column=1, padx=5, pady=5)
-    # cluster_axis1_combobox.bind("<<ComboboxSelected>>", lambda e: toggle_axis_entry())
 
     cluster_axis2_label = tk.Label(root, text="Cluster Axis 2:")
     cluster_axis2_label.grid(row=2, column=0, padx=5, pady=5)
     cluster_axis2_combobox = ttk.Combobox(root, values=column_names)
     cluster_axis2_combobox.grid(row=2, column=1, padx=5, pady=5)
-    # cluster_axis2_combobox.bind("<<ComboboxSelected>>", lambda e: toggle_axis_entry())
 
     cluster_axis3_label = tk.Label(root, text="Cluster Axis 3:")
     cluster_axis3_combobox = ttk.Combobox(root, values=column_names)
 
     cluster_axis4_label = tk.Label(root, text="Cluster Axis 4:")
     cluster_axis4_combobox = ttk.Combobox(root, values=column_names)
+
+    cluster_axis1_combobox.bind("<<ComboboxSelected>>", on_combobox_select)
+    cluster_axis2_combobox.bind("<<ComboboxSelected>>", on_combobox_select)
+    cluster_axis3_combobox.bind("<<ComboboxSelected>>", on_combobox_select)
+    cluster_axis4_combobox.bind("<<ComboboxSelected>>", on_combobox_select)
 
     add_axis_button = tk.Button(root, text="Add Axis", command=add_axis_entry)
     add_axis_button.grid(row=6, column=0, columnspan=2, padx=5, pady=5)
