@@ -1,8 +1,9 @@
 import os
+from pydoc import Helper
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import helper
+from utils.helper import Helper
 
 
 def kmeans(data: pd.DataFrame, k: int, par1: str, par2: str, par3: str, par4: str):
@@ -10,61 +11,22 @@ def kmeans(data: pd.DataFrame, k: int, par1: str, par2: str, par3: str, par4: st
     diff = 1
     step = 0
     threshold = 0.3
+    helper = Helper()
 
     if par3 == "":
         alg_name = "2D"
         data = data[[par1, par2]]
         centroids = data.sample(k)  # Get random centorids from data data
-        plt.scatter(data[par1], data[par2], c="black")
-        plt.scatter(centroids[par1], centroids[par2], c="red")
-        plt.xlabel(par1)
-        plt.ylabel(par2)
-        plt.show()
     elif par4 == "":
         alg_name = "3D"
         data = data[[par1, par2, par3]]
         centroids = data.sample(k)  # Get random centorids from data data
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection="3d")
-        img = ax.scatter(data[par1], data[par2], data[par3], c="black")
-        centroids_img = ax.scatter(
-            centroids[par1],
-            centroids[par2],
-            centroids[par3],
-            c="red",
-            marker="x",
-            s=100,
-            label="Centroids",
-        )
-        ax.set_xlabel(par1)
-        ax.set_ylabel(par2)
-        ax.set_zlabel(par3)
     else:
         alg_name = "4D"
         data = data[[par1, par2, par3, par4]]
         centroids = data.sample(k)  # Get random centroids from data data
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection="3d")
-        img = ax.scatter(
-            data[par1], data[par2], data[par3], c=data[par4], cmap="viridis"
-        )
-        centroids_img = ax.scatter(
-            centroids[par1],
-            centroids[par2],
-            centroids[par3],
-            c="red",
-            marker="x",
-            s=100,
-            label="Centroids",
-        )
-        ax.set_xlabel(par1)
-        ax.set_ylabel(par2)
-        ax.set_zlabel(par3)
 
-        cbar = plt.colorbar(img)
-        cbar.set_label(par4)
-
-    plt.show()
+    plot_original_data(data, centroids, par1, par2, par3, par4)
 
     while diff != 0 and diff > threshold and step <= 40:
         tmp_data = data
@@ -141,11 +103,16 @@ def kmeans(data: pd.DataFrame, k: int, par1: str, par2: str, par3: str, par4: st
     if par4 != "":
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
-        par4_max = data.max()[par4]
-        par4_min = data.min()[par4]
-        for index, row in data.iterrows():
-            # print(row[par4])
-            data.at[index, par4] = ((row[par4] - par4_min) / (par4_max - par4_min)) * 10
+        par4_max = data[par4].max()
+        par4_min = data[par4].min()
+        if par4_max != par4_min:
+            for index, row in data.iterrows():
+                # print(row[par4])
+                data.at[index, par4] = (
+                    (row[par4] - par4_min) / (par4_max - par4_min)
+                ) * 10
+        else:
+            data[par4] = data[par4] ** 0.5
         for cluster in range(k):
             data_at_cluster = data[data["Cluster"] == cluster + 1]
             print(f"Cluster: {cluster} : {data_at_cluster}")
@@ -154,7 +121,7 @@ def kmeans(data: pd.DataFrame, k: int, par1: str, par2: str, par3: str, par4: st
                 data_at_cluster[par2],
                 data_at_cluster[par3],
                 c=helper.random_color(),
-                s=data_at_cluster[par4] ** 2,
+                s=data_at_cluster[par4],
                 label=f"Cluster {cluster + 1}",
             )
 
@@ -172,8 +139,9 @@ def kmeans(data: pd.DataFrame, k: int, par1: str, par2: str, par3: str, par4: st
         ax.set_ylabel(par2)
         ax.set_zlabel(par3)
 
-        # cbar = plt.colorbar(img)
+        cbar = plt.colorbar(img)
         cbar.set_label(par4)
+
     elif par3 != "":
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
@@ -213,4 +181,58 @@ def kmeans(data: pd.DataFrame, k: int, par1: str, par2: str, par3: str, par4: st
     file_name = kmeans.__name__ + alg_name + "_" + str(next_file_number) + ".png"
 
     plt.savefig(os.path.join(helper.target_directory, file_name))
+    plt.show()
+
+
+def plot_original_data(
+    data: pd.DataFrame,
+    centroids: pd.DataFrame,
+    par1: str,
+    par2: str,
+    par3: str,
+    par4: str,
+):
+    if par3 == "":
+        plt.scatter(data[par1], data[par2], c="black")
+        plt.scatter(centroids[par1], centroids[par2], c="red")
+        plt.xlabel(par1)
+        plt.ylabel(par2)
+    elif par4 == "":
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+        img = ax.scatter(data[par1], data[par2], data[par3], c="black")
+        centroids_img = ax.scatter(
+            centroids[par1],
+            centroids[par2],
+            centroids[par3],
+            c="red",
+            marker="x",
+            s=100,
+            label="Centroids",
+        )
+        ax.set_xlabel(par1)
+        ax.set_ylabel(par2)
+        ax.set_zlabel(par3)
+    else:
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+        img = ax.scatter(
+            data[par1], data[par2], data[par3], c=data[par4], cmap="viridis"
+        )
+        centroids_img = ax.scatter(
+            centroids[par1],
+            centroids[par2],
+            centroids[par3],
+            c="red",
+            marker="x",
+            s=100,
+            label="Centroids",
+        )
+        ax.set_xlabel(par1)
+        ax.set_ylabel(par2)
+        ax.set_zlabel(par3)
+
+        cbar = plt.colorbar(img)
+        cbar.set_label(par4)
+
     plt.show()

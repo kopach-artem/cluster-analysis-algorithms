@@ -1,17 +1,23 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
+import numpy as np
 import pandas as pd
 import kmeans
 import kmeanspp
+import dbscan
 from utils import filters
+from scipy.spatial.distance import pdist
 
 
-def run_kmeans():
-    cluster_count = cluster_count_entry.get()
+def run_clusterisation():
+    cluster_count = (
+        "" if cluster_count_entry.get() == "" else int(cluster_count_entry.get())
+    )
     cluster_axis1 = cluster_axis1_combobox.get()
     cluster_axis2 = cluster_axis2_combobox.get()
     cluster_axis3 = cluster_axis3_combobox.get()
+    cluster_axis4 = cluster_axis4_combobox.get()
     method = method_combobox.get()
     count = sum(
         1
@@ -31,25 +37,41 @@ def run_kmeans():
     print("Dimensions: " + str(count) + "D")
     print("Method: ", method)
 
+    if cluster_axis4 != "":
+        data_n = data[[cluster_axis1, cluster_axis2, cluster_axis3, cluster_axis4]]
+    elif cluster_axis3 != "":
+        data_n = data[[cluster_axis1, cluster_axis2, cluster_axis3]]
+    else:
+        data_n = data[[cluster_axis1, cluster_axis2]]
+
+    # Рассчитываем попарные расстояния
+    dist_matrix = pdist(data_n, "euclidean")
+
+    # Находим квантиль 0.05 распределения расстояний
+    radius = np.percentile(dist_matrix, 0.75)
+
+    filtered_data = filters.process_data(
+        data_n, radius, cluster_axis1, cluster_axis2, cluster_axis3, cluster_axis4
+    )
+
     if method == "kmeans":
-        data_raw = filters.my_filter(
-            data, 11, cluster_axis1_combobox.get(), cluster_axis2_combobox.get()
-        )
         kmeans.kmeans(
-            data_raw,
-            int(cluster_count_entry.get()),
-            cluster_axis1_combobox.get(),
-            cluster_axis2_combobox.get(),
-            cluster_axis3_combobox.get(),
-            cluster_axis4_combobox.get(),
+            filtered_data,
+            cluster_count,
+            cluster_axis1,
+            cluster_axis2,
+            cluster_axis3,
+            cluster_axis4,
         )
     elif method == "kmeans++":
         kmeanspp.kmeans_pp(
-            data, cluster_axis1_combobox.get(), cluster_axis2_combobox.get()
+            filtered_data, cluster_axis1, cluster_axis2, cluster_axis3, cluster_axis4
         )
     else:
-        pass
-        # dbscan.DBSCANImpl(data, cluster_axis1_combobox.get(), cluster_axis2_combobox.get())
+        print(data)
+        dbscan.dbscan_clustering(
+            data, cluster_axis1, cluster_axis2, cluster_axis3, cluster_axis4
+        )
 
     root.destroy()
 
@@ -79,13 +101,12 @@ def on_combobox_select(event):
     for cb in comboboxes:
         if cb is not event.widget:
             current_value = cb.get()
-            # cb["values"] = [x for x in column_names if x != selected_option]
+            cb["values"] = [x for x in column_names if x != selected_option]
             if current_value == selected_option:
                 cb.set("")  # Clear selection if it's the same as the newly selected
 
 
 column_names = []
-
 while True:
     axis_counter = 2
     file_path = filedialog.askopenfilename(
@@ -98,7 +119,7 @@ while True:
         print(data.head())
     else:
         raise Exception("Sorry, you do not select any file.")
-
+    column_names.append("")
     for column in data.columns:
         if data[column].dtype == "int64" or data[column].dtype == "float":
             column_names.append(column)
@@ -146,7 +167,7 @@ while True:
     method_combobox = ttk.Combobox(root, values=["kmeans", "kmeans++", "DBSCAN"])
     method_combobox.grid(row=5, column=1, padx=5, pady=5)
 
-    run_button = tk.Button(root, text="Run", command=run_kmeans)
+    run_button = tk.Button(root, text="Run", command=run_clusterisation)
     run_button.grid(row=8, column=0, columnspan=10, padx=5, pady=5)
 
     root.mainloop()
@@ -154,6 +175,7 @@ while True:
     ans = str(input("Do you want to continue? y/n: "))
 
     if ans == "y":
+        column_names.clear()
         continue
     else:
         break
